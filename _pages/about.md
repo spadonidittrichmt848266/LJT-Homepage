@@ -22,7 +22,7 @@ My research interests include:
 ## Academic Background
 
 - **Ph.D. in Computer Science** — Hong Kong University of Science and Technology (HKUST), 2024–Present
-- **B.Eng.** — Shanghai Jiao Tong University (SJTU), 2020–2024; graduated in June 2024
+- **B.Eng.** — Shanghai Jiao Tong University (SJTU), 2020–2024; graduated in June 2024. Professor Junxian He also advised me during my undergraduate studies at SJTU.
 - **Honors:** Zhiyuan Honor Scholarship, Shanghai Jiao Tong University
 
 ## Research Experience
