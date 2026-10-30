@@ -155,7 +155,6 @@ analytics:
 include:
   - .htaccess
   - _pages
-  - files
 exclude:
   - "*.sublime-project"
   - "*.sublime-workspace"
@@ -164,23 +163,37 @@ exclude:
   - .github
   - .jekyll-assets-cache
   - .sass-cache
+  - AGENTS.md
   - assets/js/_main.js
   - assets/js/plugins
   - assets/js/vendor
   - CHANGELOG
   - Capfile
   - config
+  - docker-compose.yaml
   - Dockerfile
   - Gemfile
   - Gruntfile.js
   - gulpfile.js
+  - images/500x300.png
+  - images/bio-photo-2.jpg
+  - images/bio-photo.jpg
+  - images/editing-talk.png
+  - images/themes
+  - images/wiki
   - LICENSE
   - local
   - log
+  - markdown_generator
   - node_modules
   - package.json*
   - Rakefile
   - README
+  - scripts
+  - talkmap
+  - talkmap.ipynb
+  - talkmap.py
+  - talkmap_out.ipynb
   - tmp
   - vendor
 keep_files:
