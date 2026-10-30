@@ -1,0 +1,40 @@
+name: Temporary site build check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: ruby/setup-ruby@v1.328.0
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+          cache-version: 0
+      - name: Install UglifyJS
+        run: npm install -g uglify-js
+      - name: Minify JS files
+        run: uglifyjs assets/js/plugins/jquery.greedy-navigation.js assets/js/_main.js assets/js/theme.js -c -m -o assets/js/main.min.js
+      - name: Build with Jekyll
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+      - name: Inspect generated pages
+        run: |
+          ls -R _site | head -100
+          echo '--- About page ---'
+          sed -n '1,200p' _site/index.html
+          echo '--- Publications page ---'
+          sed -n '1,200p' _site/publications/index.html
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site-build-check
+          path: _site
