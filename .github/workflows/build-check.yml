@@ -27,14 +27,63 @@ jobs:
         run: bundle exec jekyll build
         env:
           JEKYLL_ENV: production
-      - name: Inspect generated pages
+      - name: Verify site content and internal links
         run: |
-          ls -R _site | head -100
-          echo '--- About page ---'
-          sed -n '1,200p' _site/index.html
-          echo '--- Publications page ---'
-          sed -n '1,200p' _site/publications/index.html
-      - uses: actions/upload-artifact@v4
-        with:
-          name: site-build-check
-          path: _site
+          python - <<'PY'
+          import html.parser
+          import pathlib
+          import re
+          import urllib.parse
+
+          root = pathlib.Path('_site')
+          base = 'https://spadonidittrichmt848266.github.io/LJT-Homepage'
+
+          class Links(html.parser.HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.hrefs = []
+              def handle_starttag(self, tag, attrs):
+                  for key, value in attrs:
+                      if key == 'href' and value:
+                          self.hrefs.append(value)
+
+          missing = []
+          for page in sorted(root.rglob('*.html')):
+              parser = Links()
+              parser.feed(page.read_text())
+              for href in parser.hrefs:
+                  if href.startswith(('mailto:', '#', 'tel:')):
+                      continue
+                  if href.startswith('http'):
+                      if not href.startswith(base):
+                          continue
+                      path = urllib.parse.urlparse(href).path
+                  else:
+                      path = href.split('#')[0]
+                  if not path or path == '/':
+                      continue
+                  path = path.replace('/LJT-Homepage', '', 1)
+                  target = root / path.lstrip('/')
+                  if not target.exists() and not (target / 'index.html').exists():
+                      missing.append((str(page), href))
+          print('Missing internal links:', missing)
+
+          about = (root / 'index.html').read_text()
+          pubs = (root / 'publications' / 'index.html').read_text()
+          titles = re.findall(r'<a href="[^"]*" rel="permalink">([^<]+)</a>', pubs)
+          print('Publication order:', titles)
+          assert len(titles) == 6, 'Expected six publications'
+          for title in titles:
+              assert title in about, 'Publication missing from About page: ' + title
+
+          combined = '\n'.join(p.read_text() for p in root.rglob('*.html'))
+          for placeholder in ['Your Name', 'Paper Title Number', 'GitHub University', 'Red Brick University', 'none@example.org', 'blog-post-', 'portfolio item number']:
+              assert placeholder not in combined, 'Template placeholder found: ' + placeholder
+
+          print('SynLogic detail page:')
+          detail = (root / 'publication' / 'synlogic' / 'index.html').read_text()
+          body = detail.split('<div class="archive">')[1].split('<div class="page__footer">')[0]
+          print(body)
+          assert not missing, 'Broken internal links'
+          print('All content and link checks passed.')
+          PY
